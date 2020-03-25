@@ -751,13 +751,30 @@ class DependencyScanner {
     if ( !isEqualsDeep( deps1 , deps2 ) ) throw StateError('dependencies> ignoreDependency: $ignoreDependency') ;
   }
 
-  bool _confirm_YES(String question) {
-    return _confirm(question, ['yes','y']) ;
+  bool _confirm_YES(String question, [bool allowYesAll = true]) {
+    return _confirm(question, ['yes','y'], allowYesAll) ;
   }
 
-  bool _confirm(String question, List<String> answer) {
+  bool _yesAll = false ;
+
+  bool get yesAll => _yesAll;
+
+  set yesAll(bool value) {
+    _yesAll = value ?? false ;
+  }
+
+  bool _confirm(String question, List<String> answer, [bool allowYesAll = false]) {
+    if (allowYesAll && _yesAll) {
+      print('$question> yes (auto confirm)') ;
+      return true ;
+    }
+
     answer = answer.map( (e) => e.toLowerCase().trim() ).toList() ;
     var resp = _ask(question).toLowerCase().trim() ;
+    if (allowYesAll && resp.replaceAll(RegExp(r'\s'), '') == 'yesall') {
+      _yesAll = true ;
+      resp = 'yes' ;
+    }
     return answer.contains(resp) ;
   }
 

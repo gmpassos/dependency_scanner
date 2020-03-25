@@ -1,3 +1,7 @@
+## 1.0.2
+
+- add auto confirm response: yes all
+
 ## 1.0.1
 
 - swiss_knife: ^2.3.9
