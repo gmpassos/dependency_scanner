@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:dependency_scanner/dependency_scanner.dart' as dependency_scanner ;
 
-import 'package:path/path.dart' as path ;
 
 
 void showHelp() {
