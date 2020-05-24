@@ -1,3 +1,8 @@
+## 1.0.3
+
+- Fix scan of unversioned project/pubspec.
+- Upgrade dependencies.
+
 ## 1.0.2
 
 - add auto confirm response: yes all

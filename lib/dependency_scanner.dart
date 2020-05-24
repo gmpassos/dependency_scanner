@@ -117,6 +117,11 @@ class DependencyScanner {
     for (var project in projects) {
       var pubSpec = await project.pubSpec ;
 
+      if ( pubSpec.version == null ) {
+        print('  - ${ pubSpec.name }: NO VERSION') ;
+        continue ;
+      }
+
       print('  - ${ pubSpec.name }: ${ pubSpec.version }') ;
 
       var versions = await project.versions ;
