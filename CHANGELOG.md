@@ -1,3 +1,9 @@
+## 1.0.4
+
+- Improve help.
+- Add command `list`.
+- dartfmt.
+
 ## 1.0.3
 
 - Fix scan of unversioned project/pubspec.
