@@ -1,3 +1,9 @@
+## 1.0.5
+
+- Show errors when trying to change a pubspec, to show format issues at the console.
+- Improve README.md
+- swiss_knife: ^2.4.1
+
 ## 1.0.4
 
 - Improve help.

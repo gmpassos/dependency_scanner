@@ -17,6 +17,13 @@ Dart Dependency Scanner: scans workspace directory for Dart projects and runs ba
     ```bash
     $> depscan /path/to/your/workspace_dir pub_get projects1 projects2 extra_project
     ```
+## list
+
+* List all projects in workspace
+
+    ```bash
+    $> depscan /path/to/your/workspace_dir list
+    ```
 
 ## upgrade_dependency
 

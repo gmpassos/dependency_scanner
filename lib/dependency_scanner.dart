@@ -6,7 +6,7 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:swiss_knife/swiss_knife_vm.dart';
 
-final String VERSION = '1.0.4';
+final String VERSION = '1.0.5';
 
 class DependencyScanner {
   final Directory mainDirectory;
@@ -454,8 +454,15 @@ class DependencyScanner {
           print(
               '    - $depName[$verStr] -> [${localPubSpec.version}] ${localProject.directory.path}');
 
-          await _rewritePubSpec_dependencyPath(
-              project, depName, localProject.directory.path);
+          try {
+            await _rewritePubSpec_dependencyPath(
+                project, depName, localProject.directory.path);
+          }
+          catch (e,s) {
+            print(e) ;
+            print(s) ;
+            print('** ERROR REWRITING PUBSPEC: $project ; ${ localProject.directory.path }') ;
+          }
         }
       }
 
@@ -517,7 +524,7 @@ class DependencyScanner {
           var pathEntry = regExpReplaceAllMapped(patternPath, g3, (match) {
             var g3_1 = match.group(1);
             var g3_2 = match.group(2);
-            //var g3_3 = match.group(3);
+            var g3_3 = match.group(3);
             var g3_4 = match.group(4);
             return g3_1 + g3_2 + localPath + g3_4;
           });
@@ -534,7 +541,18 @@ class DependencyScanner {
 
     //print('\n$data2\n') ;
 
-    var pubSpec2 = PubSpec.fromYamlString(data2);
+    PubSpec pubSpec2 ;
+
+    try {
+      pubSpec2 = PubSpec.fromYamlString(data2);
+    }
+    catch (e,s) {
+      print(e) ;
+      print(s) ;
+      print('** ERROR PARSING PUBSPEC:') ;
+      print(data2) ;
+      throw StateError(e) ;
+    }
 
     _checkPubSpec(pubSpec, pubSpec2, depName);
 

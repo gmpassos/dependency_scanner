@@ -1,6 +1,6 @@
 name: dependency_scanner
-description: Dart Dependency Scanner for local projects in a workspace.
-version: 1.0.4
+description: Dart Dependency Scanner for local projects in a workspace. Allows automated upgrades, pug get and more.
+version: 1.0.5
 homepage: https://github.com/gmpassos/dependency_scanner
 
 environment:
@@ -11,7 +11,7 @@ dependencies:
   pubspec: ^0.1.4
   pub_semver: ^1.4.4
   pub_client: ^3.0.3
-  swiss_knife: ^2.4.0
+  swiss_knife: ^2.4.1
     #path: ../swiss_knife
 
 dev_dependencies:
