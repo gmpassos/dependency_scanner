@@ -1,3 +1,7 @@
+## 1.0.6
+
+- Fix package version pattern.
+
 ## 1.0.5
 
 - Show errors when trying to change a pubspec, to show format issues at the console.

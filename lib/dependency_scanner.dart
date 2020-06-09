@@ -264,7 +264,7 @@ class DependencyScanner {
     var dialect = {
       'n': r'[\r\n]',
       's': r'[ \t]',
-      'depVer': r'"?\^?[\d\.\w-]+"?',
+      'depVer': r'"?\^?[\d\.\w\+-]+"?',
       'depVerComm': r'#$depVer',
       'path': r'$n$s+path:$s*\S+$s*',
       'pathComm': r'(?:$n$s+#path:$s*\S+$s*)',
@@ -457,11 +457,11 @@ class DependencyScanner {
           try {
             await _rewritePubSpec_dependencyPath(
                 project, depName, localProject.directory.path);
-          }
-          catch (e,s) {
-            print(e) ;
-            print(s) ;
-            print('** ERROR REWRITING PUBSPEC: $project ; ${ localProject.directory.path }') ;
+          } catch (e, s) {
+            print(e);
+            print(s);
+            print(
+                '** ERROR REWRITING PUBSPEC: $project ; ${localProject.directory.path}');
           }
         }
       }
@@ -524,7 +524,7 @@ class DependencyScanner {
           var pathEntry = regExpReplaceAllMapped(patternPath, g3, (match) {
             var g3_1 = match.group(1);
             var g3_2 = match.group(2);
-            var g3_3 = match.group(3);
+            //var g3_3 = match.group(3);
             var g3_4 = match.group(4);
             return g3_1 + g3_2 + localPath + g3_4;
           });
@@ -541,17 +541,16 @@ class DependencyScanner {
 
     //print('\n$data2\n') ;
 
-    PubSpec pubSpec2 ;
+    PubSpec pubSpec2;
 
     try {
       pubSpec2 = PubSpec.fromYamlString(data2);
-    }
-    catch (e,s) {
-      print(e) ;
-      print(s) ;
-      print('** ERROR PARSING PUBSPEC:') ;
-      print(data2) ;
-      throw StateError(e) ;
+    } catch (e, s) {
+      print(e);
+      print(s);
+      print('** ERROR PARSING PUBSPEC:');
+      print(data2);
+      throw StateError(e);
     }
 
     _checkPubSpec(pubSpec, pubSpec2, depName);
