@@ -1,6 +1,7 @@
 ## 1.0.6
 
 - Fix package version pattern.
+- swiss_knife: ^2.5.2
 
 ## 1.0.5
 
