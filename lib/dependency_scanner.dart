@@ -489,7 +489,7 @@ class DependencyScanner {
     var dialect = {
       'n': r'[\r\n]',
       's': r'[ \t]',
-      'depVer': r'"?\^?[\d\.\w-]+"?',
+      'depVer': r'"?\^?[\d\.\w\+-]+"?',
       'depVerComm': r'#$depVer',
       'path': r'$n$s+path:$s*\S+$s*',
       'pathComm': r'(?:$n$s+#path:$s*\S+$s*)',
@@ -666,7 +666,7 @@ class DependencyScanner {
     var dialect = {
       'n': r'[\r\n]',
       's': r'[ \t]',
-      'depVer': r'"?\^?[\d\.\w-]+"?',
+      'depVer': r'"?\^?[\d\.\w\+-]+"?',
       'depVerComm': r'#$depVer',
       'path': r'$n$s+path:$s*\S+$s*',
       'pathComm': r'(?:$n$s+#path:$s*\S+$s*)',

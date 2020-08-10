@@ -1,3 +1,7 @@
+## 1.0.7
+
+- Fixed dependency version parser.
+
 ## 1.0.6
 
 - Fix package version pattern.
