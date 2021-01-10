@@ -6,7 +6,7 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:swiss_knife/swiss_knife_vm.dart';
 
-final String VERSION = '1.0.5';
+final String VERSION = '1.0.8';
 
 class DependencyScanner {
   final Directory mainDirectory;
@@ -17,7 +17,7 @@ class DependencyScanner {
     if (mainDirectory == null) throw ArgumentError('null mainDirectory');
   }
 
-  Future<bool> check() async {
+  Future<bool> _check() async {
     if (!await mainDirectory.exists()) {
       if (verbose) print("mainDirectory doesn't extis: $mainDirectory");
       return false;
@@ -25,7 +25,7 @@ class DependencyScanner {
     return true;
   }
 
-  Future<List<File>> listPubSpecFiles() async {
+  Future<List<File>> _listPubSpecFiles() async {
     // ignore: omit_local_variable_types
     List<File> files = [];
 
@@ -41,12 +41,13 @@ class DependencyScanner {
 
   final Map<String, List<Version>> _packagesVersionsCache = {};
 
+  /// Returns a package latest version (from `pub.dev`).
   Future<List<Version>> getPackageVersions(String packageName) async {
     if (_packagesVersionsCache.containsKey(packageName)) {
       return _packagesVersionsCache[packageName];
     }
 
-    var versions = await getPackageVersionsImpl(packageName);
+    var versions = await _getPackageVersionsImpl(packageName);
     _packagesVersionsCache[packageName] = versions;
 
     return versions;
@@ -54,9 +55,10 @@ class DependencyScanner {
 
   pub_client.PubClient _pubClient;
 
+  /// The `pub.dev` client.
   pub_client.PubClient get pubClient => _pubClient ??= pub_client.PubClient();
 
-  Future<List<Version>> getPackageVersionsImpl(String packageName) async {
+  Future<List<Version>> _getPackageVersionsImpl(String packageName) async {
     try {
       var pack = await pubClient.getPackage(packageName);
       var versions = pack.versions.map((v) => v.version).toList();
@@ -70,11 +72,13 @@ class DependencyScanner {
 
   List<Project> _scannedProjects;
 
+  /// Returns a list of scanned projects names.
   Future<List<String>> getScannedProjectsNames() async {
     return await Future.wait(
         _scannedProjects.map((p) async => (await p.pubSpec).name).toList());
   }
 
+  /// Return a scanned [Project] with [name].
   Future<Project> getScannedProject(String name) async {
     for (var proj in _scannedProjects) {
       var projName = await proj.name;
@@ -83,15 +87,16 @@ class DependencyScanner {
     return null;
   }
 
+  /// Scan projects and print infos.
   Future<List<Project>> scan() async {
-    if (!await check()) {
+    if (!await _check()) {
       return [];
     }
 
-    consoleLine();
+    printConsoleLine();
     print('SCANNING DIRECTORY: $mainDirectory');
 
-    var files = await listPubSpecFiles();
+    var files = await _listPubSpecFiles();
 
     print("\n* Found ${files.length} 'pubspec.yaml' files:");
     files.forEach((f) => print('  - ${f.path}'));
@@ -100,15 +105,15 @@ class DependencyScanner {
 
     print('\n* Loading projects PubSpecs...');
 
-    Project.loadPubSpecs(projects);
+    await Project.loadPubSpecs(projects);
 
     print('\n* Loaded ${projects.length} projects PubSpec:');
 
     print('\n* Loading ${projects.length} projects versions...');
 
-    Project.loadVersions(projects);
+    await Project.loadVersions(projects);
 
-    Project.loadAll(projects);
+    await Project.loadAll(projects);
 
     print('\n* Projects:');
 
@@ -145,35 +150,47 @@ class DependencyScanner {
     return List.from(projects).cast();
   }
 
-  static void consoleLine() {
+  static void printConsoleLine() {
     print(
         '--------------------------------------------------------------------');
   }
 
-  void by() {
-    consoleLine();
+  void printConsoleBy() {
+    printConsoleLine();
     print('By!\n');
     exit(0);
   }
 
+  /// Executas a [command] with [args].
+  ///
+  /// Commands:
+  /// - pubget  %projects --- Does a `pub get` in %projects list. Accepts `all` as argument.
+  /// - clean  %projects --- Cleans %projects list. Accepts `all` as argument.
+  /// - list --- List Dart projects in workspace.
+  /// - localpath %projects --- Scan %projects and point them to local path projects when possible. Accepts `all` as argument.
+  /// - rollbacklocalpath %projects --- Rollback command `localpath` in %projects. Accepts `all` as argument.
+  /// - upgradedependency %packages --- Upgrade projects dependencies that are in %packages list, checking for last version at pub.dev.
+  ///
   Future<bool> doCommand(String command, List<String> args) async {
     var commandSimple =
         command.toLowerCase().trim().replaceAll(RegExp(r'[\W_]'), '');
 
-    consoleLine();
+    printConsoleLine();
     print('EXECUTING COMMAND: $command $args');
 
     switch (commandSimple) {
       case 'upgradedependency':
-        return doCommand_upgradeDependency(args);
+        return _doCommand_upgradeDependency(args);
       case 'pubget':
-        return doCommand_pubGet(args);
+        return _doCommand_pubGet(args);
+      case 'clean':
+        return _doCommand_clean(args);
       case 'list':
-        return doCommand_list();
+        return _doCommand_list();
       case 'localpath':
-        return doCommand_localPath(args);
+        return _doCommand_localPath(args);
       case 'rollbacklocalpath':
-        return doCommand_rollback_localPath(args);
+        return _doCommand_rollback_localPath(args);
       default:
         {
           print("** Can't find command: $command [$commandSimple]");
@@ -182,10 +199,8 @@ class DependencyScanner {
     }
   }
 
-  //////////////////////////
-
-  Future<bool> doCommand_upgradeDependency(List<String> packages) async {
-    consoleLine();
+  Future<bool> _doCommand_upgradeDependency(List<String> packages) async {
+    printConsoleLine();
 
     var dependenciesVersions =
         packages.map((p) => DependencyVersion.parse(p)).toList();
@@ -329,10 +344,8 @@ class DependencyScanner {
     return true;
   }
 
-  //////////////////////////
-
-  Future<bool> doCommand_pubGet(List<String> projects) async {
-    consoleLine();
+  Future<bool> _doCommand_pubGet(List<String> projects) async {
+    printConsoleLine();
 
     var all = projects.firstWhere((p) => p == '*' || p.toLowerCase() == 'all',
             orElse: () => null) !=
@@ -372,10 +385,57 @@ class DependencyScanner {
     return true;
   }
 
-  //////////////////////////
+  Future<bool> _doCommand_clean(List<String> projects) async {
+    printConsoleLine();
 
-  Future<bool> doCommand_list() async {
-    consoleLine();
+    var all = projects.firstWhere((p) => p == '*' || p.toLowerCase() == 'all',
+            orElse: () => null) !=
+        null;
+
+    if (all) {
+      projects = await getScannedProjectsNames();
+    }
+
+    print('CLEAN: $projects\n');
+
+    if (projects.isEmpty) {
+      print('** Empty arguments! No project to run: pub get');
+      return false;
+    }
+
+    for (var projectName in projects) {
+      if (projectName == '*' || projectName.toLowerCase() == 'all') continue;
+
+      var project = await getScannedProject(projectName);
+
+      if (project == null) {
+        print("  ** Can't find project: $projectName");
+        continue;
+      }
+
+      var projectDir = project.directory.path;
+
+      if (isEmptyString(projectDir)) {
+        print(
+            "  ** Can't clean project with empty directory path: $projectName");
+        continue;
+      }
+
+      print('\n-- $projectName: running clean at $projectDir\n');
+
+      await Process.run('rm', ['-r', '.dart_tool'],
+              workingDirectory: projectDir, runInShell: true)
+          .then((result) {
+        stdout.write(result.stdout);
+        stderr.write(result.stderr);
+      });
+    }
+
+    return true;
+  }
+
+  Future<bool> _doCommand_list() async {
+    printConsoleLine();
 
     var projects = await getScannedProjectsNames();
 
@@ -385,10 +445,8 @@ class DependencyScanner {
     return true;
   }
 
-  //////////////////////////
-
-  Future<bool> doCommand_localPath(List<String> projects) async {
-    consoleLine();
+  Future<bool> _doCommand_localPath(List<String> projects) async {
+    printConsoleLine();
 
     var all = projects.firstWhere((p) => p == '*' || p.toLowerCase() == 'all',
             orElse: () => null) !=
@@ -533,10 +591,10 @@ class DependencyScanner {
         }
       }
 
-      var ident = g2.replaceFirst(RegExp(r'^[\r\n]+'), '');
-      ident = regExpReplaceAll(r'^(\s+).*', ident, r'$1');
+      var indent = g2.replaceFirst(RegExp(r'^[\r\n]+'), '');
+      indent = regExpReplaceAll(r'^(\s+).*', indent, r'$1');
 
-      return g1 + g2 + '\n$ident  path: $localPath' + g3;
+      return g1 + g2 + '\n$indent  path: $localPath' + g3;
     });
 
     //print('\n$data2\n') ;
@@ -581,10 +639,8 @@ class DependencyScanner {
     return true;
   }
 
-  //////////////////////////
-
-  Future<bool> doCommand_rollback_localPath(List<String> projects) async {
-    consoleLine();
+  Future<bool> _doCommand_rollback_localPath(List<String> projects) async {
+    printConsoleLine();
 
     var all = projects.firstWhere((p) => p == '*' || p.toLowerCase() == 'all',
             orElse: () => null) !=
@@ -713,10 +769,10 @@ class DependencyScanner {
         }
       }
 
-      var ident = g2.replaceFirst(RegExp(r'^[\r\n]+'), '');
-      ident = regExpReplaceAll(r'^(\s+).*', ident, r'$1');
+      var indent = g2.replaceFirst(RegExp(r'^[\r\n]+'), '');
+      indent = regExpReplaceAll(r'^(\s+).*', indent, r'$1');
 
-      return g1 + g2 + '\n$ident  #path: $localPath';
+      return g1 + g2 + '\n$indent  #path: $localPath';
     });
 
     //print('\n$data2\n') ;
@@ -751,8 +807,6 @@ class DependencyScanner {
 
     return true;
   }
-
-  //////////////////////////
 
   void _checkPubSpec(
       PubSpec pubSpec, PubSpec pubSpec2, String ignoreDependency) {
@@ -791,6 +845,7 @@ class DependencyScanner {
 
   bool _yesAll = false;
 
+  /// If [true] will auto answer `yes` to prompts.
   bool get yesAll => _yesAll;
 
   set yesAll(bool value) {
@@ -880,16 +935,17 @@ class DependencyVersion {
 }
 
 class Project {
-  static void loadPubSpecs(List<Project> projects) {
-    Future.wait(projects.map((p) => p.pubSpec));
+  static Future<List<PubSpec>> loadPubSpecs(List<Project> projects) async {
+    return Future.wait(projects.map((p) => p.pubSpec));
   }
 
-  static void loadVersions(List<Project> projects) {
-    Future.wait(projects.map((p) => p.versions));
+  static Future<List<List<Version>>> loadVersions(
+      List<Project> projects) async {
+    return Future.wait(projects.map((p) => p.versions));
   }
 
-  static void loadAll(List<Project> projects) {
-    Future.wait(projects.map((p) async {
+  static Future<List<String>> loadAll(List<Project> projects) async {
+    return Future.wait(projects.map((p) async {
       var pubSpec = await p.pubSpec;
       var versions = await p.versions;
       var hasGit = await p.hasGit;
@@ -911,8 +967,7 @@ class Project {
   PubSpec _pubSpec;
 
   Future<PubSpec> get pubSpec async {
-    if (_pubSpec != null) return _pubSpec;
-    _pubSpec = await PubSpec.loadFile(pubSpecFile.path);
+    _pubSpec ??= await PubSpec.loadFile(pubSpecFile.path);
     return _pubSpec;
   }
 

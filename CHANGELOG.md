@@ -1,3 +1,9 @@
+## 1.0.8
+
+- New command `clean`, to clean all Dart projects.
+- Added API documentation.
+- Clean code.
+
 ## 1.0.7
 
 - Fixed dependency version parser.

@@ -14,12 +14,14 @@ void showHelp() {
   print('COMMANDS:');
   print('');
   print(
-      '  - pubget  %projects            # Does a `pub get` in %projects list. Accepts `*` as argument.');
+      '  - pubget  %projects            # Does a `pub get` in %projects list. Accepts `all` as argument.');
+  print(
+      '  - clean  %projects            # Cleans %projects list. Accepts `all` as argument.');
   print('  - list                         # List Dart projects in workspace.');
   print(
-      '  - localpath %projects          # Scan %projects and point them to local path projects when possible. Accepts `*` as argument.');
+      '  - localpath %projects          # Scan %projects and point them to local path projects when possible. Accepts `all` as argument.');
   print(
-      '  - rollbacklocalpath %projects  # Rollback command `localpath` in %projects. Accepts `*` as argument.');
+      '  - rollbacklocalpath %projects  # Rollback command `localpath` in %projects. Accepts `all` as argument.');
   print(
       '  - upgradedependency %packages  # Upgrade projects dependencies that are in %packages list, checking for last version at pub.dev.');
   print('');
@@ -44,5 +46,5 @@ void main(List<String> arguments) async {
     await depScan.doCommand(command, commandArgs);
   }
 
-  depScan.by();
+  depScan.printConsoleBy();
 }
