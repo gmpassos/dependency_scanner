@@ -374,7 +374,7 @@ class DependencyScanner {
 
       print('\n-- $projectName: running pub get...\n');
 
-      await Process.run('pub', ['get'],
+      await Process.run('dart', ['pub', 'get'],
               workingDirectory: project.directory.path, runInShell: true)
           .then((result) {
         stdout.write(result.stdout);

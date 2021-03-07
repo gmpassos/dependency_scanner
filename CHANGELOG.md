@@ -1,3 +1,12 @@
+## 1.0.9
+
+- Change command `pub get` to `dart pub get`.
+- CI: change to `dart` commands.
+- pubspec: ^0.1.5
+- swiss_knife: ^2.5.26
+- pedantic: ^1.11.0
+- test: ^1.16.5
+
 ## 1.0.8
 
 - New command `clean`, to clean all Dart projects.
